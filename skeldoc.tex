@@ -1,0 +1,219 @@
+% Copyright (c) 2020 Magnus Lie Hetland
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+
+\documentclass[twocolumn, a4paper]{article}
+
+\usepackage{lmodern}
+\def\sfdefault{cmbr}
+\def\ttdefault{cmtl}
+
+\usepackage{skeldoc}
+
+\usepackage{amsthm}
+\newtheorem{thm}{Theorem}
+
+% For discussing commmands:
+
+\makeatletter
+\ExplSyntaxOn
+
+% Copied from http://ctan.uib.no/macros/latex/base/doc.dtx
+% Protect when used in moving arguments.
+{\catcode`\|=\z@ \catcode`\\=12 |gdef|bslash{\}}
+
+\NewDocumentCommand \cs { m } {%
+    \texttt{\bslash #1}%
+}
+
+\NewDocumentCommand \braces { +m } {%
+    \string{#1\string}%
+}
+
+\NewDocumentCommand \pkg { o m } {
+    \IfNoValueTF { #1 } {
+        \textsf { #2 }
+    } {
+        \href{ #1 }{ \textsf { #2 } }
+    }
+}
+
+\NewDocumentCommand \var { m } {
+    $\langle$
+    \textnormal{\textit{#1}}
+    $\rangle$
+}
+
+\ExplSyntaxOff
+\makeatother
+
+% To illustrate the \skelpseudo command:
+
+\usepackage{pseudo}
+
+\title{\skelline{The \pkg{skeldoc} package is intended for incremental
+document development, with commands that insert simplified placeholder
+elements for missing parts, similar to \emph{skeleton screens}, optionally
+with associated notes explaining the placeholders.}}
+
+\author{\skelline[5cm]}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+    \skelpar[4]
+\end{abstract}
+
+\section{Introduction}
+
+\skelpar[7]{All the skeleton commands are followed by an optional argument in
+brackets, and one (also optional) in braces, like
+\cs{skelfoo}\texttt{[\var{conf}]\braces{\var{note}}}. The first argument is
+for limited local
+configuration, setting keys relevant to the specific command. Each command
+also lets you supply one such config value \emph{without} a key, leaving the
+key implicit. For example, for \cs{skelline} (a single skeleton line), this is
+\texttt{width} and for \cs{skelpar} (a single skeleton paragraph), it's
+\texttt{lines}. So \cs{skelline[5cm]} is the same as
+\cs{skelline[width\,=\,5cm]}. The \cs{skelpar} command also has the keys
+\texttt{first-width}, \texttt{width} and \texttt{last-width}, to adjust the
+various line widths.
+
+The argument in braces is a \emph{note} associated with the skeleton element,
+typeset using the \cs{skelnote} command, which places a number in the margin
+and an note at the end of the document (or wherever the \cs{printskelnotes}
+command is placed), with hyperlinks in both directions.
+
+Beyond the keys available locally, there are several \emph{global} config
+keys, which may be set using the \cs{skelset} command (which respects \TeX{}
+groups, so such config may also be local, e.g., by wrapping the relevant part
+of the document in braces). For example, one might use
+\cs{skelset\braces{main-color\allowbreak\,=\,black}} to produce a look along
+the lines of the \pkg[https://ctan.org/pkg/censor]{censor} package. Shared
+defaults for the local keys may also be set in this way, generally using the
+local key name with the type of element as a prefix; for example,
+\texttt{par-lines} is used to set the default for the \texttt{lines} key of
+the \cs{skelpar} command. There are also some other general keys, like
+\texttt{main-color} and \texttt{full-width}. For an overview of the
+configuration keys, please consult the source file, \texttt{skeldoc.sty}.}
+\skelenum[3]
+\noindent
+\skelpar[3]
+
+\section{\skelline}
+
+\skelpar
+
+\skelnote{It is possible to add notes in arbitrary parts of a document with
+the \cs{skelnote} command. This could also be used as a simple to-do or
+annotation mechanism.}
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+voluptua.
+\skelpar[2]
+At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+gubergren, no sea takimata sanctus est.
+
+\skelpar
+\skelitems{The \cs{skelenum} and \cs{skelitems} commands produce skeleton
+\emph{lists} (using \texttt{enumeration} and \texttt{itemize}). Their implicit
+key is \texttt{items}, which controls the number of items, while
+\texttt{item-lines} controls the number of lines per item.}
+\noindent
+\skelpar[4]
+
+\begin{figure}
+\skelfig[5cm]{Skeleton figures (\cs{skelfig}) have \texttt{height} as their
+implicit key. The width may be modified using the \texttt{width} key.}
+\skelcaption{Skeleton captions are best typeset using the special-purpose
+\cs{skelcaption} command, rather than simply placing a \cs{skelpar} in a
+normal \cs{caption}, at least if you intend to attach a note. This is because
+captions are generally typeset more than once, in order to determine whether
+to center them; \cs{skelcaption} prevents any attached note from being added
+to the note list twice.
+
+The implicit argument of \cs{skelcaption} is \texttt{lines}, and the other
+keys are as for \cs{skelpar}, relying on the same defaults and global
+configuration.}
+\end{figure}%
+
+\skelpar
+\begin{equation}
+    \skelline
+\end{equation}
+\skelpars[3]{Multiple skeleton paragraphs may be produced using the
+\cs{skelpars} command, whose implicit key is \texttt{pars}, controlling
+the number of paragraphs.}
+
+\begin{table}
+\skelcaption[1]{The \cs{skelcaption} command may be used for figures and
+tables alike.}
+\skeltabular[7]{The \cs{skeltabular} command produces a skeleton table
+(specifically, a \texttt{tabularx}). The implicit key is \texttt{rows},
+controlling the number of rows in the table. The \cs{tabcolsep} and
+\cs{arraystretch} used can be set with the \texttt{colsep} and
+\texttt{stretch} keys.}
+\end{table}
+
+\skelpar
+
+\begin{thm}
+    \skelpar[3]
+\end{thm}
+\begin{proof}
+\skelpar
+\end{proof}
+
+\skelpar
+
+\section{\skelline}
+
+\skelpar
+\skelpseudo[
+    head={\pr{Lorem-Ipsum}(\id{dolor}, \id{sit}, \id{amet})},
+]{The \cs{skelpseudo} command only works if the
+\pkg[https://ctan.org/pkg/pseudo]{pseudo} package has been imported. (It is
+not imported by the \pkg{skeldoc} package.) The implicit key is
+\texttt{lines}, the number of lines to produce (in addition to the headline,
+if any). By default, no headline is included, but one may be set using the
+\texttt{head} key (e.g., using the \cs{pr} command from the
+\pkg[https://ctan.org/pkg/pseudo]{pseudo} package, rather than \cs{hd},
+because the \texttt{head} key handles the \cs{multicolumn} stuff itself; for
+example, use
+\texttt{head\,=\,\braces{\cs{pr}\braces{\var{name}}(\var{args})}}). The indent
+pattern is set using the \texttt{newlines} key, which should be a
+comma-separated list of newline commands as used by the
+\pkg[https://ctan.org/pkg/pseudo]{pseudo} package (such as \cs{\bslash+} or
+\cs{\bslash--}). This list is used round-robin as the lines progress. E.g., if
+you want pseudocode without any indentation, simply use
+\texttt{newlines\,=\,\cs{\bslash}}.}
+\skelpar
+
+\section{Discussion}
+
+\skelpars[2]
+
+\skelbib{The \cs{skelbib} command produces a skeleton bibliography, with the
+number of items controlled by the implicit key \texttt{items}. The number of
+lines per item is controlled by \texttt{item-lines}.}
+
+\printskelnotes
+
+\end{document}

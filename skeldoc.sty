@@ -1,0 +1,778 @@
+% Copyright (c) 2020 Magnus Lie Hetland
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+
+\def \skelversion {0.1}
+\def \skeldate    {2020-12-30}
+
+\RequirePackage{expl3}
+
+\ProvidesExplPackage
+    {skeldoc}
+    {\skeldate}
+    {\skelversion}
+    {Placeholders for unfinished documents}
+
+\RequirePackage{xcolor}
+\RequirePackage{xparse}
+
+\RequirePackage{tabularx}
+\RequirePackage{booktabs}
+
+\RequirePackage{hyperref}
+
+\RequirePackage{enotez}
+\setenotez{backref, mark-cs={}}
+
+\RequirePackage{marginnote}
+
+\RequirePackage{enumitem}
+
+\cs_new:Npn \skel_tl_from_key:N #1 {
+    \tl_set_rescan:Nno #1 { } { \l_keys_key_str }
+}
+
+% #1: command name
+% #2: variable associated with unknown keys
+% #3: key-val list for local \keys_define:nn
+%
+% Note: Local keyword arguments referring to global defaults should be token
+% lists (..._tl, rather than, say, ..._int) to avoid expansion of the default
+% when it is set initially.
+\cs_new:Npn \skel_defaults:nnn #1 #2 #3 {
+
+    \keys_define:nn { skeldoc / #1 } {
+
+        #3
+
+        unknown     .code:n             = {
+            \tl_set_rescan:Nno #2 { } { \l_keys_key_str }
+        },
+        unknown     .value_forbidden:n  = true
+
+    }
+
+}
+
+% #1: command name
+% #2: key-val list for local \keys_set:nn
+\cs_new:Npn \skel_args:nn #1 #2 {
+
+    \keys_set:nn { skeldoc / #1 } { #2 }
+
+}
+
+%% Configuration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Blue from Solarized (https://ethanschoonover.com/solarized/)
+% (See also https://ctan.org/pkg/xcolor-solarized.)
+\definecolor{skel-blue}{HTML}{268BD2}
+
+\keys_define:nn { skeldoc } {
+
+    %% General config
+
+    main-color      .code:n         = \colorlet{skel-main-color}{#1}        ,
+    main-color      .initial:n      = black!7                               ,
+
+    full-width      .tl_set:N       = \l_skel_full_width_tl                 ,
+    full-width      .initial:n      = \linewidth                            ,
+
+    short-width     .tl_set:N       = \l_skel_short_width_tl                ,
+    short-width     .initial:n      = .72\l_skel_full_width_tl              ,
+
+    fill-width      .tl_set:N       = \l_skel_fill_width_tl                 ,
+    fill-width      .initial:n      = 0pt~plus~1fill                        ,
+
+    hypersetup      .tl_set:N       = \l_skel_hypersetup_tl                 ,
+    hypersetup      .initial:n      = hidelinks                             ,
+
+    % With basic LaTeX classes, twocolumn seems to shrink \marginparwidth to
+    % 4.0pt. marginnote.sty uses this width, so we must make sure there's room
+    % for our endnote marks. (To avoid having \marginpardiwth interfered with,
+    % just set min-mpwidth=0pt in the preamble.)
+    min-mpwidth     .dim_set:N      = \l_skel_min_mpwidth_dim               ,
+    min-mpwidth     .initial:n      = 3em                                   ,
+
+    line-raise      .tl_set:N       = \l_skel_line_raise_tl                 ,
+    line-raise      .initial:n      = -.3ex                                 ,
+
+    line-height     .tl_set:N       = \l_skel_line_height_tl                ,
+    line-height     .initial:n      = 2.1ex                                 ,
+
+    %% \skelnote is only configured through \skelset -- no local config
+
+    note-font       .tl_set:N       = \l_skel_note_font_tl                  ,
+    note-font       .initial:n      = \normalsize\normalfont                ,
+
+    note-color      .code:n         = \colorlet{skel-note-color}{#1}        ,
+    note-color      .initial:n      = skel-blue!70                          ,
+
+    %% Defaults for \skelline
+
+    line-width      .tl_set:N       = \l_skel_line_width_default_tl         ,
+    line-width      .initial:n      = \l_skel_short_width_tl                ,
+
+    %% Defaults for \skelpar
+
+    par-lines       .int_set:N      = \l_skel_par_lines_default_int         ,
+    par-lines       .initial:n      = 10                                    ,
+
+    par-first-width .tl_set:N       = \l_skel_par_first_width_default_tl    ,
+    par-first-width .initial:n      = \l_skel_fill_width_tl                 ,
+
+    par-width       .tl_set:N       = \l_skel_par_width_default_tl          ,
+    par-width       .initial:n      = \l_skel_full_width_tl                 ,
+
+    par-last-width  .tl_set:N       = \l_skel_par_last_width_default_tl     ,
+    par-last-width  .initial:n      = \l_skel_short_width_tl                ,
+
+    %% Defaults for \skelfig
+
+    fig-width       .tl_set:N       = \l_skel_fig_width_default_tl          ,
+    fig-width       .initial:n      = \l_skel_full_width_tl                 ,
+
+    fig-height      .tl_set:N       = \l_skel_fig_height_default_tl         ,
+    fig-height      .initial:n      = 5cm                                   ,
+
+    %% Defaults for \skelcaption
+
+    caption-lines   .int_set:N      = \l_skel_caption_lines_default_int     ,
+    caption-lines   .initial:n      = 3                                     ,
+
+    %% Defaults for \skelpars
+
+    pars-pars       .int_set:N      = \l_skel_pars_default_int              ,
+    pars-pars       .initial:n      = 5                                     ,
+
+    %% Defaults for lists (\skelitems and \skelenum)
+
+    list-items      .int_set:N      = \l_skel_list_items_default_int        ,
+    list-items      .initial:n      = 4                                     ,
+
+    list-item-lines .int_set:N      = \l_skel_list_item_lines_default_int   ,
+    list-item-lines .initial:n      = 2                                     ,
+
+    %% Defaults for \skeltabular
+
+    tabular-rows    .int_set:N      = \l_skel_tabular_rows_default_int      ,
+    tabular-rows    .initial:n      = 10                                    ,
+
+    tabular-colsep  .tl_set:N       = \l_skel_tabular_colsep_default_tl     ,
+    tabular-colsep  .initial:n      = 2pt                                   ,
+
+    tabular-stretch .tl_set:N       = \l_skel_tabular_stretch_default_tl    ,
+    tabular-stretch .initial:n      = 1.2                                   ,
+
+    %% Defaults for \skelbib
+
+    bib-items       .int_set:N      = \l_skel_bib_items_default_int         ,
+    bib-items       .initial:n      = 12                                    ,
+
+    bib-item-lines  .int_set:N      = \l_skel_bib_item_lines_default_int    ,
+    bib-item-lines  .initial:n      = 2                                     ,
+
+    %% Defaults for \skelpseudo
+
+    pseudo-lines    .int_set:N      = \l_skel_pseudo_lines_default_int      ,
+    pseudo-lines    .initial:n      = 8                                     ,
+
+    pseudo-head     .tl_set:N       = \l_skel_pseudo_head_default_tl        ,
+    pseudo-head     .initial:n      =                                       ,
+
+    pseudo-newlines .tl_set:N       = \l_skel_pseudo_newlines_default_tl    ,
+    pseudo-newlines .initial:n      = {
+        \\+, \\-, \\+, \\+, \\--, \\+, \\, \\-
+    },
+
+}
+
+\NewDocumentCommand \skelset { +m } {
+    \keys_set:nn { skeldoc } { #1 }
+}
+
+%% Rules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% #1: raise
+% #2: width
+% #3: thickness
+\cs_new_protected:Npn \skel_rule:nnn #1 #2 #3  {
+    \textcolor  {skel-main-color} {
+        \rule [#1] {#2} {#3}
+    }
+}
+
+% #1: width
+\cs_new_protected:Npn \skel_line:n #1 {
+    \skel_rule:nnn
+        { \l_skel_line_raise_tl  } { #1  } { \l_skel_line_height_tl }
+}
+\cs_new:Npn \skel_line: {
+    \skel_line:n { \l_skel_line_width_tl }
+}
+
+% #1: raise
+% #2: width/fill
+% #3: thickness
+\cs_new_protected:Npn \skel_fill:nnn #1 #2 #3 {
+    \leavevmode
+    \textcolor{skel-main-color}{
+        \leaders\hrule
+            height \dim_eval:n { #3 + #1 }
+            depth  \dim_eval:n { -#1 }
+            \skip_horizontal:n { #2 }
+    }
+    \kern0pt
+}
+
+% #1: fill
+\cs_new:Npn \skel_fill:n #1 {
+    \skel_fill:nnn
+        { \l_skel_line_raise_tl }
+        { #1 }
+        { \l_skel_line_height_tl }
+}
+
+\cs_new:Npn \skel_fill: {
+    \skel_fill:n { \l_skel_fill_width_tl }
+}
+
+%% skelline %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\skel_defaults:nnn { skelline } { \l_skel_line_width_tl } {
+
+    width       .tl_set:N           = \l_skel_line_width_tl                 ,
+    width       .initial:n          = \l_skel_line_width_default_tl         ,
+
+}
+\NewDocumentCommand \skelline { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelline } { #1 }
+
+    \IfValueT { #2 } { \skelnote { #2 } }
+
+    \skel_line:
+
+    \group_end:
+
+}
+
+%% skelpar %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\int_new:N \l_skel_par_lines_int
+
+\skel_defaults:nnn { skelpar } { \l_skel_par_lines_tl } {
+
+    lines           .tl_set:N       = \l_skel_par_lines_tl                  ,
+    lines           .initial:n      = \l_skel_par_lines_default_int         ,
+
+    first-width     .tl_set:N       = \l_skel_par_first_width_tl            ,
+    first-width     .initial:n      = \l_skel_par_first_width_default_tl    ,
+
+    width           .tl_set:N       = \l_skel_par_width_tl                  ,
+    width           .initial:n      = \l_skel_par_width_default_tl          ,
+
+    last-width      .tl_set:N       = \l_skel_par_last_width_tl             ,
+    last-width      .initial:n      = \l_skel_par_last_width_default_tl     ,
+
+}
+\NewDocumentCommand \skelpar { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelpar } { #1 }
+    \int_set:Nn \l_skel_par_lines_int \l_skel_par_lines_tl
+
+    \IfValueT { #2 } { \skelnote { #2 } }
+
+    \skel_par:
+
+    \group_end:
+
+}
+
+% \skelpar implementation -- also used in \skelcaption
+
+\cs_new_protected:Npn \skel_par: {
+
+    \group_begin:
+
+    \int_compare:nNnTF { \l_skel_par_lines_int } = { 1 } {
+        \skel_line:n { \l_skel_par_last_width_tl  }
+    } {
+        \skel_fill:n { \l_skel_par_first_width_tl  } \\
+    }
+
+    \int_decr:N \l_skel_par_lines_int
+
+    \int_step_inline:nn { \l_skel_par_lines_int } {
+
+        \int_compare:nNnTF { ##1 } = { \l_skel_par_lines_int } {
+            \skel_line:n { \l_skel_par_last_width_tl  }
+        } {
+            \skel_line:n { \l_skel_par_width_tl  }
+        }
+
+        \allowbreak
+
+    }
+
+    \group_end:
+
+}
+
+%% \skelfig %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\skel_defaults:nnn { skelfig } { \l_skel_fig_height_tl } {
+
+    width           .tl_set:N       = \l_skel_fig_width_tl                  ,
+    width           .initial:n      = \l_skel_fig_width_default_tl          ,
+
+    height          .tl_set:N       = \l_skel_fig_height_tl                 ,
+    height          .initial:n      = \l_skel_fig_height_default_tl         ,
+
+}
+\NewDocumentCommand \skelfig { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelfig } { #1 }
+
+    \IfValueT { #2 } { \skelnote { #2 } }
+
+    \skel_rule:nnn
+        { 0pt }
+        { \l_skel_fig_width_tl }
+        { \l_skel_fig_height_tl }
+
+    \group_end:
+
+}
+
+%% \skelcaption %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\skel_defaults:nnn { skelcaption } { \l_skel_caption_lines_tl } {
+
+    lines           .tl_set:N       = \l_skel_caption_lines_tl              ,
+    lines           .initial:n      = \l_skel_caption_lines_default_int     ,
+
+    first-width     .tl_set:N       = \l_skel_par_first_width_tl            ,
+    first-width     .initial:n      = \l_skel_par_first_width_default_tl    ,
+
+    width           .tl_set:N       = \l_skel_par_width_tl                  ,
+    width           .initial:n      = \l_skel_par_width_default_tl          ,
+
+    last-width      .tl_set:N       = \l_skel_par_last_width_tl             ,
+    last-width      .initial:n      = \l_skel_par_last_width_default_tl     ,
+
+}
+\NewDocumentCommand \skelcaption { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelcaption } { #1 }
+    \int_set:Nn \l_skel_par_lines_int \l_skel_caption_lines_tl
+
+    \skel_maybe_skip_note:n \l_skel_par_lines_int
+
+    % In case we have paragraphs in the note -- we don't want those on the
+    % loose inside \caption (and we might as well avoid putting the
+    % conditional in there, while we're at it):
+    \tl_clear:N \l_tmpa_tl
+    \IfValueT { #2 } {
+        \tl_set:Nn \l_tmpa_tl { \skelnote { #2 } }
+    }
+
+    \caption{
+        \l_tmpa_tl
+        \skel_par:
+    }
+
+    \group_end:
+
+}
+
+%% \skelpars %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\int_new:N \l_skel_pars_int
+
+\skel_defaults:nnn { skelpars } { \l_skel_pars_tl } {
+
+    pars            .int_set:N      = \l_skel_pars_tl                       ,
+    pars            .initial:n      = \l_skel_pars_default_int              ,
+
+}
+\NewDocumentCommand \skelpars { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelpars } { #1 }
+    \int_set:Nn \l_skel_pars_int \l_skel_pars_tl
+    \int_set:Nn \l_skel_par_lines_int \l_skel_par_lines_tl
+
+    \IfValueT { #2 } { \skelnote { #2 } }
+
+    \int_step_inline:nn { \l_skel_pars_int } {
+        \skel_par:
+        \int_compare:nNnF { ##1 } = { \l_skel_pars_int } {
+            \par
+        }
+    }
+
+    \group_end:
+
+}
+
+%% Lists: \skelitems and \skelenum %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\skel_defaults:nnn { lists } { \l_skel_items_tl } {
+
+    items           .tl_set:N       = \l_skel_list_items_tl                 ,
+    items           .initial:n      = \l_skel_list_items_default_int        ,
+
+    item-lines      .tl_set:N       = \l_skel_list_item_lines_tl            ,
+    item-lines      .initial:n      = \l_skel_list_item_lines_default_int   ,
+
+}
+
+\NewDocumentCommand \skelitems { +O{} +g } {
+
+    \skel_list:nnn { #1 } { #2 } { itemize }
+
+}
+
+\NewDocumentCommand \skelenum { +O{} +g } {
+
+    \skel_list:nnn { #1 } { #2 } { enumerate }
+
+}
+
+\cs_new:Npn \skel_list:nnn #1 #2 #3 {
+
+    \group_begin:
+
+    \skel_args:nn { lists } { #1 }
+    \int_set:Nn \l_skel_par_lines_int \l_skel_list_item_lines_tl
+
+    \begin{#3}
+    \int_step_inline:nn { \l_skel_list_items_tl } {
+        \item \mbox{}
+        \int_compare:nNnT { ##1 } = { 1 } {
+            \IfValueT { #2 } { \skelnote { #2 } }
+        }
+        \skel_par:
+    }
+    \end{#3}
+
+    \group_end:
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Initial definitions here may be overridden for some additional
+% customization, beyond the configuration keys.
+
+% Could also use l columns here, and \skel_rule:n with a given width in the
+% header row, but if colortbl is imported (e.g., indirectly via pseudo), using
+% \skel_fill: in later rows won't work.
+\cs_new:Npn \skel_tabular_env:n #1 {
+    \begin{tabularx}{\l_skel_full_width_tl}[t]{@{}p{.22\linewidth}p{1.5cm}X@{}}
+        #1
+    \end{tabularx}
+}
+
+\tl_const:Nn \c_skel_tabular_row_tl {
+    \skel_fill: & \skel_fill: & \skel_fill: \\
+}
+
+\tl_const:Nn \c_skel_tabular_note_raise_tl { -1.8ex }
+
+\skel_defaults:nnn { skeltabular } { \l_skel_tabular_rows_tl } {
+
+    rows            .tl_set:N       = \l_skel_tabular_rows_tl               ,
+    rows            .initial:n      = \l_skel_tabular_rows_default_int      ,
+
+    colsep          .tl_set:N       = \l_skel_tabular_colsep_tl             ,
+    colsep          .initial:n      = \l_skel_tabular_colsep_default_tl     ,
+
+    stretch         .tl_set:N       = \arraystretch                         ,
+    stretch         .initial:n      = \l_skel_tabular_stretch_default_tl    ,
+
+}
+\NewDocumentCommand \skeltabular { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skeltabular } { #1 }
+
+    \dim_set:Nn \tabcolsep \l_skel_tabular_colsep_tl
+
+    \IfValueT { #2 } {
+        % Adjusted for top-alignment to match that of \skelline/\skelpar
+        \raisebox{ \c_skel_tabular_note_raise_tl }{
+            \skelnote { #2 }
+        }
+    }
+
+    \tl_clear:N \l_tmpa_tl
+    \int_step_inline:nn { \l_skel_tabular_rows_tl } {
+        \tl_put_right:Nn \l_tmpa_tl {
+            \c_skel_tabular_row_tl
+        }
+    }
+
+    \skel_tabular_env:n {
+        \toprule
+            \c_skel_tabular_row_tl
+        \midrule
+            \l_tmpa_tl
+        \bottomrule
+    }
+
+    \group_end:
+
+}
+
+%% \skelbib %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\skel_defaults:nnn { skelbib } { \l_skel_bib_items_tl } {
+
+    items           .tl_set:N       = \l_skel_bib_items_tl                  ,
+    items           .initial:n      = \l_skel_bib_items_default_int         ,
+
+    item-lines      .tl_set:N       = \l_skel_bib_item_lines_tl             ,
+    item-lines      .initial:n      = \l_skel_bib_item_lines_default_int    ,
+
+}
+\NewDocumentCommand \skelbib { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelbib } { #1 }
+
+    \IfValueT { #2 } {
+        % Hack: Inject note into the section name, for positioning.
+        \tl_set_eq:NN \l_tmpa_tl \refname
+        \tl_set:Nn \refname { \skelnote{#2} \l_tmpa_tl }
+    }
+    \int_set:Nn \l_tmpa_int \l_skel_bib_items_tl
+    \begin{thebibliography} { \int_use:N \l_tmpa_int }
+    \int_step_inline:nn { \l_skel_bib_items_tl } {
+        \bibitem{bibitem##1}
+        \skelpar[lines=\l_skel_bib_item_lines_tl]
+    }
+    \end{thebibliography}
+
+    \group_end:
+
+}
+
+%% \skelpseudo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\int_new:N \l_skel_pseudo_lines_int
+
+\skel_defaults:nnn { skelpseudo } { \l_skel_pseudo_lines_tl } {
+
+    lines           .tl_set:N       = \l_skel_pseudo_lines_tl               ,
+    lines           .initial:n      = \l_skel_pseudo_lines_default_int      ,
+
+    % If no head is given, the headline will be suppressed
+    head            .tl_set:N       = \l_skel_pseudo_head_tl                ,
+    head            .initial:n      = \l_skel_pseudo_head_default_tl        ,
+
+    newlines        .tl_set:N       = \l_skel_pseudo_newlines_tl            ,
+    % Can't use this, because we wouldn't know the number of levels to expand:
+    % newlines      .initial:n      = \l_skel_pseudo_newlines_default_tl    ,
+    newlines        .initial:n      =                                       ,
+
+}
+\NewDocumentCommand \skelpseudo { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelpseudo } { #1 }
+    \int_set:Nn \l_skel_pseudo_lines_int \l_skel_pseudo_lines_tl
+
+    % Body, constructed incrementally
+    \tl_clear:N \l_tmpa_tl
+
+    % Line number, so we know when we're done
+    \int_zero:N \l_tmpa_int
+
+    % Because we can't use .initial:n for newlines:
+    \tl_if_empty:NT \l_skel_pseudo_newlines_tl {
+        \tl_set_eq:NN
+            \l_skel_pseudo_newlines_tl
+            \l_skel_pseudo_newlines_default_tl
+    }
+
+    \seq_set_from_clist:NN \l_tmpa_seq \l_skel_pseudo_newlines_tl
+
+    \int_while_do:nNnn { \l_tmpa_int } < { \l_skel_pseudo_lines_int + 1 } {
+
+        \seq_map_inline:Nn \l_tmpa_seq {
+
+            \int_incr:N \l_tmpa_int
+
+            \int_compare:nNnT { \l_tmpa_int } > { \l_skel_pseudo_lines_int } {
+                \seq_map_break:
+            }
+
+            \tl_put_right:Nn \l_tmpa_tl { \skelline ##1 }
+
+        }
+
+    }
+
+    % Expanding the head, to see if it's actually empty
+    \tl_set:Nx \l_tmpb_tl \l_skel_pseudo_head_tl
+    \tl_if_empty:NTF \l_tmpb_tl {
+        \begin{pseudo}
+            \IfValueT { #2 } { \skelnote { #2 } }
+            \l_tmpa_tl
+        \end{pseudo}
+    } {
+        \begin{pseudo}*
+            \multicolumn{2}
+                {>{\pseudohpad} l <{\pseudohpad}}
+                { \IfValueT { #2 } { \skelnote { #2 } }
+                \l_tmpb_tl }
+            \\
+            \l_tmpa_tl
+        \end{pseudo}
+    }
+
+    \group_end:
+
+    % The indentation behavior gets messed up by the group around the pseudo
+    % environment. This restores the behavior: No indent unless you have a
+    % new paragraph.
+    \noindent\ignorespaces
+
+}
+
+%% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\cs_new:Npn \skel_note:n #1 {
+    \leavevmode
+    % Smash to avoid messing with vertical alignment of of surrounding text
+    \smash{\marginnote{
+        \l_skel_note_font_tl
+        \textcolor{skel-note-color}{
+            \endnotemark
+        }
+    }}
+    \endnotetext{\ignorespaces #1 \unskip}
+    \ignorespaces
+}
+
+\NewDocumentCommand \skelnote { +m } {
+    \skel_note:n { #1 }
+}
+
+\cs_set_eq:NN \skel_note_orig:n \skel_note:n
+
+\cs_new:Npn \skel_skip_note: {
+    \cs_gset_eq:NN \skel_note:n \skel_note_skipped:n
+}
+
+\cs_new:Npn \skel_note_skipped:n #1 {
+    \cs_gset_eq:NN \skel_note:n \skel_note_orig:n
+}
+
+\AtBeginDocument {
+
+    % Make sure this is run after caption is loaded, even if it's loaded
+    % before skeldoc:
+    \@ifpackageloaded { caption } {
+        % The caption package typesets the caption twice even if it's only a
+        % single line -- but only if the singlelinecheck is on, so we'll turn
+        % that on locally, for predictability.
+        \cs_new:Npn \skel_maybe_skip_note:n #1 {
+            \captionsetup{singlelinecheck=true}
+            \skel_skip_note:
+        }
+    } {
+        % Without caption.sty, assuming default LaTeX behavior, which is that the
+        % caption is typeset twice only if there are two or more lines (as
+        % indicated by #1).
+        \cs_new:Npn \skel_maybe_skip_note:n #1 {
+            \int_compare:nNnT { #1 } > { 1 } {
+                \skel_skip_note:
+            }
+        }
+    }
+
+    % If the \marginparwidth is too low when the document begins, we change
+    % it to make room:
+    \dim_compare:nNnT { \marginparwidth } < { \l_skel_min_mpwidth_dim } {
+        \dim_set:Nn \marginparwidth { \l_skel_min_mpwidth_dim }
+    }
+
+    % Supply hyperref.sty with the hidelinks option, unless that's been turned
+    % off (or changed) with \skelset:
+    \hypersetup { \l_skel_hypersetup_tl }
+
+}
+
+% Rewritten (from enotez.sty), to avoid having the \box_move_up:nn shift my
+% margin notes. Adding a \smash to the hypertarget, but not the link (which
+% would then be essentially unclickable).
+\cs_set_protected:Npn \enotez_write_mark:nn #1#2 {
+    \bool_if:NTF \l__enotez_hyperfootnotes_bool {
+        \enotezwritemark { \hyperlink {enz.#1} { \enmarkstyle #2 } }
+        \bool_if:NT \l__enotez_hyperbackref_bool {
+            \smash { % Added
+                \box_move_up:nn {1em}
+                { \hbox:n { \hypertarget {enz.#1.backref} { } } }
+            }
+        }
+    }
+    { \enotezwritemark { \enmarkstyle #2 } }
+}
+
+% The default enumitem paragraph-style list has the label protrude into the
+% margin, which can be problematic in twocolumn layout, with a narrow column
+% gap. To automatically compute the width of the widest label, we keep the
+% widest label from enotez in \g_skel_widest_note_label_tl.
+\newlist { skel-note-list-type } { enumerate } { 10 }
+\tl_new:N \g_skel_widest_note_label_tl
+\setlist [ skel-note-list-type ] {
+    widest = \g_skel_widest_note_label_tl,
+    label = \arabic*.,
+    leftmargin = *,
+    listparindent=\parindent,
+    parsep = 0pt,
+    itemsep = 4.0pt plus 2.0pt minus 1.0pt,
+
+}
+
+\DeclareInstance { enotez-list } { skel-note-list } { list } {
+    number = \textcolor{skel-note-color}{#1.},
+    list-type = skel-note-list-type,
+}
+
+\NewDocumentCommand \printskelnotes { } {
+    \tl_set:Ne \g_skel_widest_note_label_tl \theendnote
+    \printendnotes[skel-note-list]
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
