@@ -44,6 +44,8 @@
 
 \RequirePackage{enumitem}
 
+\cs_generate_variant:Nn \tl_set:Nn { Ne }
+
 \cs_new:Npn \skel_tl_from_key:N #1 {
     \tl_set_rescan:Nno #1 { } { \l_keys_key_str }
 }
