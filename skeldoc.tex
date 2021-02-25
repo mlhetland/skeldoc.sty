@@ -124,13 +124,22 @@ configuration keys, please consult the source file, \texttt{skeldoc.sty}.}
 
 \skelnote{It is possible to add notes in arbitrary parts of a document with
 the \cs{skelnote} command. This could also be used as a simple to-do or
-annotation mechanism.}
+annotation mechanism. Note that \cs{skelnote} is designed so you can place it
+before a paragraph or the like, and get the number positioned correctly. This
+means it gobbles up any space that follows it. To avoid this, simply follow it
+by an escaped space, for example, as in \texttt{\cs{skelnote}\braces{My
+note}\cs{\char32}}.}
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
-eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
-voluptua.
+eirmod tempor invidunt ut labore et dolore magna aliquyam erat~\skelref{Here I'm
+referring to something non-existent, with \cs{skelref}, whose implicit key is
+\texttt{width}.}, sed diam voluptua.
 \skelpar[2]
 At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-gubergren, no sea takimata sanctus est.
+gubergren, no sea takimata sanctus est~\skelcite{And here is a missing
+bibliographic reference, with \cs{skelcite}, whose implicit key is
+\texttt{width}. You can also control the left and right braces (or whatever text
+you wish to surround the citation with) using the \texttt{left} and
+\texttt{right} keys.}.
 
 \skelpar
 \skelitems{The \cs{skelenum} and \cs{skelitems} commands produce skeleton

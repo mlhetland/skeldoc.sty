@@ -131,6 +131,22 @@
     line-width      .tl_set:N       = \l_skel_line_width_default_tl         ,
     line-width      .initial:n      = \l_skel_short_width_tl                ,
 
+    %% Defaults for \skelref
+
+    ref-width       .tl_set:N       = \l_skel_ref_width_default_tl          ,
+    ref-width       .initial:n      = 1em                                   ,
+
+    %% Defaults for \skelcite
+
+    cite-width      .tl_set:N       = \l_skel_cite_width_default_tl         ,
+    cite-width      .initial:n      = .75em                                 ,
+
+    cite-left       .tl_set:N       = \l_skel_cite_left_default_tl          ,
+    cite-left       .initial:n      = [\kern1pt,
+
+    cite-right      .tl_set:N       = \l_skel_cite_right_default_tl         ,
+    cite-right      .initial:n      = \kern1pt],
+
     %% Defaults for \skelpar
 
     par-lines       .int_set:N      = \l_skel_par_lines_default_int         ,
@@ -272,6 +288,58 @@
     \IfValueT { #2 } { \skelnote { #2 } }
 
     \skel_line:
+
+    \group_end:
+
+}
+
+%% skelref %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\skel_defaults:nnn { skelref } { \l_skel_ref_width_tl } {
+
+    width       .tl_set:N           = \l_skel_ref_width_tl                  ,
+    width       .initial:n          = \l_skel_ref_width_default_tl          ,
+
+}
+\NewDocumentCommand \skelref { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelref } { #1 }
+
+    \IfValueT { #2 } { \skelnote { #2 } }
+
+    \skel_line:n { \l_skel_ref_width_tl }
+
+    \group_end:
+
+}
+
+%% skelcite %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\skel_defaults:nnn { skelcite } { \l_skel_cite_width_tl } {
+
+    width       .tl_set:N           = \l_skel_cite_width_tl                 ,
+    width       .initial:n          = \l_skel_cite_width_default_tl         ,
+
+    left        .tl_set:N           = \l_skel_cite_left_tl                  ,
+    left        .initial:n          = \l_skel_cite_left_default_tl          ,
+
+    right       .tl_set:N           = \l_skel_cite_right_tl                 ,
+    right       .initial:n          = \l_skel_cite_right_default_tl         ,
+
+}
+\NewDocumentCommand \skelcite { +O{} +g } {
+
+    \group_begin:
+
+    \skel_args:nn { skelcite } { #1 }
+
+    \IfValueT { #2 } { \skelnote { #2 } }
+
+    \l_skel_cite_left_tl
+    \skel_line:n { \l_skel_cite_width_tl }
+    \l_skel_cite_right_tl
 
     \group_end:
 
