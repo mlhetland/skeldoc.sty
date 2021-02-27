@@ -18,8 +18,8 @@
 % OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 % SOFTWARE.
 
-\def \skelversion {0.1.2}
-\def \skeldate    {2021-02-25}
+\def \skelversion {0.1.2+}
+\def \skeldate    {2021-02-27}
 
 \RequirePackage{expl3}
 
@@ -456,7 +456,12 @@
 }
 \NewDocumentCommand \skelcaption { +O{} +g } {
 
-    \group_begin:
+    % Dropping the surrounding group, so \@currentlabel, \cref@currentlabel and
+    % any other similar constructs can "leak out" to a following \label command.
+    % Assuming that the the caption is inside a figure or table, or the like,
+    % which acts as the local environment, this should be safe.
+    %
+    % \group_begin:
 
     \skel_args:nn { skelcaption } { #1 }
     \int_set:Nn \l_skel_par_lines_int \l_skel_caption_lines_tl
@@ -476,7 +481,7 @@
         \skel_par:
     }
 
-    \group_end:
+    % \group_end:
 
 }
 

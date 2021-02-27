@@ -26,6 +26,8 @@
 
 \usepackage{skeldoc}
 
+\usepackage{cleveref}
+
 \usepackage{amsthm}
 \newtheorem{thm}{Theorem}
 
@@ -132,7 +134,7 @@ note}\cs{\char32}}.}
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
 eirmod tempor invidunt ut labore et dolore magna aliquyam erat~\skelref{Here I'm
 referring to something non-existent, with \cs{skelref}, whose implicit key is
-\texttt{width}.}, sed diam voluptua.
+\texttt{width}.}, sed diam voluptua~\cref{fig}.
 \skelpar[2]
 At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
 gubergren, no sea takimata sanctus est~\skelcite{And here is a missing
@@ -162,6 +164,7 @@ to the note list twice.
 The implicit argument of \cs{skelcaption} is \texttt{lines}, and the other
 keys are as for \cs{skelpar}, relying on the same defaults and global
 configuration.}
+\label{fig}
 \end{figure}%
 
 \skelpar
