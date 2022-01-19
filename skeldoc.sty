@@ -217,7 +217,14 @@
     pseudo-newlines .tl_set:N       = \l_skel_pseudo_newlines_default_tl    ,
     pseudo-newlines .initial:n      = {
         \\+, \\-, \\+, \\+, \\--, \\+, \\, \\-
-    },
+    }                                                                       ,
+
+    %% Showing/hiding
+
+    hide-numbers    .bool_set:N     = \l_skel_hide_numbers_bool             ,
+    hide-numbers    .initial:n      = false                                 ,
+    hide-numbers    .default:n      = true                                  ,
+
 
 }
 
@@ -747,14 +754,16 @@
 %% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \cs_new:Npn \skel_note:n #1 {
-    \leavevmode
-    % Smash to avoid messing with vertical alignment of of surrounding text
-    \smash{\marginnote{
-        \l_skel_note_font_tl
-        \textcolor{skel-note-color}{
-            \endnotemark
-        }
-    }}
+    \bool_if:NF \l_skel_hide_numbers_bool {
+        \leavevmode
+        % Smash to avoid messing with vertical alignment of of surrounding text
+        \smash{\marginnote{
+            \l_skel_note_font_tl
+            \textcolor{skel-note-color}{
+                \endnotemark
+            }
+        }}
+    }
     \endnotetext{\ignorespaces #1 \unskip}
     \ignorespaces
 }
