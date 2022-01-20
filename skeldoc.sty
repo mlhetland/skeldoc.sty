@@ -80,6 +80,11 @@
 
 }
 
+\cs_new:Npn \skel_show:n #1 { #1 }
+\cs_new:Npn \skel_hide:n #1 {    }
+
+\cs_set_eq:NN \skel_maybe:n \skel_show:n
+
 %% Configuration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Blue from Solarized (https://ethanschoonover.com/solarized/)
@@ -225,6 +230,9 @@
     hide-notes      .initial:n      = false                                 ,
     hide-notes      .default:n      = true                                  ,
 
+    hide-all        .code:n         = {
+        \cs_set_eq:NN \skel_maybe:n \skel_hide:n
+    }                                                                       ,
 
 }
 
@@ -286,7 +294,7 @@
     width       .initial:n          = \l_skel_line_width_default_tl         ,
 
 }
-\NewDocumentCommand \skelline { +O{} +g } {
+\NewDocumentCommand \skelline { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -298,7 +306,7 @@
 
     \group_end:
 
-}
+} }
 
 %% skelref %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -308,7 +316,7 @@
     width       .initial:n          = \l_skel_ref_width_default_tl          ,
 
 }
-\NewDocumentCommand \skelref { +O{} +g } {
+\NewDocumentCommand \skelref { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -320,7 +328,7 @@
 
     \group_end:
 
-}
+} }
 
 %% skelcite %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -336,7 +344,7 @@
     right       .initial:n          = \l_skel_cite_right_default_tl         ,
 
 }
-\NewDocumentCommand \skelcite { +O{} +g } {
+\NewDocumentCommand \skelcite { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -350,7 +358,7 @@
 
     \group_end:
 
-}
+} }
 
 %% skelpar %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -371,7 +379,7 @@
     last-width      .initial:n      = \l_skel_par_last_width_default_tl     ,
 
 }
-\NewDocumentCommand \skelpar { +O{} +g } {
+\NewDocumentCommand \skelpar { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -384,7 +392,7 @@
 
     \group_end:
 
-}
+} }
 
 % \skelpar implementation -- also used in \skelcaption
 
@@ -427,7 +435,7 @@
     height          .initial:n      = \l_skel_fig_height_default_tl         ,
 
 }
-\NewDocumentCommand \skelfig { +O{} +g } {
+\NewDocumentCommand \skelfig { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -442,7 +450,7 @@
 
     \group_end:
 
-}
+} }
 
 %% \skelcaption %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -461,7 +469,7 @@
     last-width      .initial:n      = \l_skel_par_last_width_default_tl     ,
 
 }
-\NewDocumentCommand \skelcaption { +O{} +g } {
+\NewDocumentCommand \skelcaption { +O{} +g } { \skel_maybe:n {
 
     % Dropping the surrounding group, so \@currentlabel, \cref@currentlabel and
     % any other similar constructs can "leak out" to a following \label command.
@@ -490,7 +498,7 @@
 
     % \group_end:
 
-}
+} }
 
 %% \skelpars %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -502,7 +510,7 @@
     pars            .initial:n      = \l_skel_pars_default_int              ,
 
 }
-\NewDocumentCommand \skelpars { +O{} +g } {
+\NewDocumentCommand \skelpars { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -521,7 +529,7 @@
 
     \group_end:
 
-}
+} }
 
 %% Lists: \skelitems and \skelenum %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -535,17 +543,17 @@
 
 }
 
-\NewDocumentCommand \skelitems { +O{} +g } {
+\NewDocumentCommand \skelitems { +O{} +g } { \skel_maybe:n {
 
     \skel_list:nnn { #1 } { #2 } { itemize }
 
-}
+} }
 
-\NewDocumentCommand \skelenum { +O{} +g } {
+\NewDocumentCommand \skelenum { +O{} +g } { \skel_maybe:n {
 
     \skel_list:nnn { #1 } { #2 } { enumerate }
 
-}
+} }
 
 \cs_new:Npn \skel_list:nnn #1 #2 #3 {
 
@@ -599,7 +607,7 @@
     stretch         .initial:n      = \l_skel_tabular_stretch_default_tl    ,
 
 }
-\NewDocumentCommand \skeltabular { +O{} +g } {
+\NewDocumentCommand \skeltabular { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -631,7 +639,7 @@
 
     \group_end:
 
-}
+} }
 
 %% \skelbib %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -644,7 +652,7 @@
     item-lines      .initial:n      = \l_skel_bib_item_lines_default_int    ,
 
 }
-\NewDocumentCommand \skelbib { +O{} +g } {
+\NewDocumentCommand \skelbib { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -665,7 +673,7 @@
 
     \group_end:
 
-}
+} }
 
 %% \skelpseudo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -686,7 +694,7 @@
     newlines        .initial:n      =                                       ,
 
 }
-\NewDocumentCommand \skelpseudo { +O{} +g } {
+\NewDocumentCommand \skelpseudo { +O{} +g } { \skel_maybe:n {
 
     \group_begin:
 
@@ -749,7 +757,7 @@
     % new paragraph.
     \noindent\ignorespaces
 
-}
+} }
 
 %% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -768,9 +776,9 @@
     \ignorespaces
 }
 
-\NewDocumentCommand \skelnote { +m } {
+\NewDocumentCommand \skelnote { +m } { \skel_maybe:n {
     \skel_note:n { #1 }
-}
+} }
 
 \cs_set_eq:NN \skel_note_orig:n \skel_note:n
 
@@ -854,9 +862,9 @@
     list-type = skel-note-list-type,
 }
 
-\NewDocumentCommand \printskelnotes { } {
+\NewDocumentCommand \printskelnotes { } { \skel_maybe:n {
     \tl_set:Ne \g_skel_widest_note_label_tl \theendnote
     \printendnotes[skel-note-list]
-}
+} }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
