@@ -221,9 +221,9 @@
 
     %% Showing/hiding
 
-    hide-numbers    .bool_set:N     = \l_skel_hide_numbers_bool             ,
-    hide-numbers    .initial:n      = false                                 ,
-    hide-numbers    .default:n      = true                                  ,
+    hide-notes      .bool_set:N     = \l_skel_hide_notes_bool               ,
+    hide-notes      .initial:n      = false                                 ,
+    hide-notes      .default:n      = true                                  ,
 
 
 }
@@ -754,7 +754,7 @@
 %% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \cs_new:Npn \skel_note:n #1 {
-    \bool_if:NF \l_skel_hide_numbers_bool {
+    \bool_if:NF \l_skel_hide_notes_bool {
         \leavevmode
         % Smash to avoid messing with vertical alignment of of surrounding text
         \smash{\marginnote{
@@ -763,8 +763,8 @@
                 \endnotemark
             }
         }}
+        \endnotetext{\ignorespaces #1 \unskip}
     }
-    \endnotetext{\ignorespaces #1 \unskip}
     \ignorespaces
 }
 
